@@ -139,57 +139,64 @@ pub struct DynamicSlippageSettings {
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
 pub struct TransactionConfig {
-    /// Wrap and unwrap SOL. Will be ignored if `destination_token_account` is set because the `destination_token_account` may belong to a different user that we have no authority to close.
+    /// 包装和解包SOL。如果设置了`destination_token_account`，该选项将被忽略，
+    /// 因为`destination_token_account`可能属于其他用户，我们无权关闭该账户。
     pub wrap_and_unwrap_sol: bool,
-    /// Allow optimized WSOL token account by using transfer, assign with seed, allocate with seed then initialize account 3 instead of the expensive associated token account process
+    /// 允许使用优化的WSOL代币账户方案：通过transfer、assign with seed、allocate with seed
+    /// 然后初始化account 3来代替昂贵的关联代币账户创建过程。
     pub allow_optimized_wrapped_sol_token_account: bool,
-    /// Fee token account for the output token, it is derived using the seeds = ["referral_ata", referral_account, mint] and the `REFER4ZgmyYx9c6He5XfaTMiGfdLwRnkV4RPp9t9iF3` referral contract (only pass in if you set a feeBps and make sure that the feeAccount has been created)
+    /// 输出代币的费用代币账户，通过种子 = ["referral_ata", referral_account, mint] 
+    /// 和`REFER4ZgmyYx9c6He5XfaTMiGfdLwRnkV4RPp9t9iF3`推荐合约派生
+    /// (仅在设置了feeBps且确保feeAccount已创建时传入)
     #[serde(with = "option_field_as_string")]
     pub fee_account: Option<Pubkey>,
-    /// Public key of the token account that will be used to receive the token out of the swap. If not provided, the user's ATA will be used. If provided, we assume that the token account is already initialized.
+    /// 用于接收交换输出代币的代币账户公钥。如未提供，将使用用户的ATA（关联代币账户）。
+    /// 如果提供，我们假定该代币账户已初始化。
     #[serde(with = "option_field_as_string")]
     pub destination_token_account: Option<Pubkey>,
-    /// Add a readonly, non signer tracking account that isn't used by jupiter
+    /// 添加一个只读、非签名的跟踪账户，该账户不被Jupiter使用
     #[serde(with = "option_field_as_string")]
     pub tracking_account: Option<Pubkey>,
-    /// compute unit price to prioritize the transaction, the additional fee will be compute unit consumed * computeUnitPriceMicroLamports
+    /// 计算单元价格，用于交易优先级排序，额外费用 = 消耗的计算单元 * computeUnitPriceMicroLamports
     pub compute_unit_price_micro_lamports: Option<ComputeUnitPriceMicroLamports>,
-    /// Prioritization fee lamports paid for the transaction in addition to the signatures fee.
-    /// Mutually exclusive with `compute_unit_price_micro_lamports`.
+    /// 除签名费外，为交易支付的优先级费用（lamports）。
+    /// 与`compute_unit_price_micro_lamports`互斥，不可同时使用。
     pub prioritization_fee_lamports: Option<PrioritizationFeeLamports>,
-    /// When enabled, it will do a swap simulation to get the compute unit used and set it in ComputeBudget's compute unit limit.
-    /// This will increase latency slightly since there will be one extra RPC call to simulate this. Default is false.
+    /// 启用后，将执行交换模拟以获取使用的计算单元，并在ComputeBudget中设置计算单元限制。
+    /// 由于需要额外进行一次RPC调用来模拟，这会略微增加延迟。默认为false。
     pub dynamic_compute_unit_limit: bool,
-    /// Request a legacy transaction rather than the default versioned transaction, needs to be paired with a quote using asLegacyTransaction otherwise the transaction might be too large
+    /// 请求使用传统交易而非默认的版本化交易。需要与使用asLegacyTransaction的报价配对使用，
+    /// 否则交易可能过大。
     ///
-    /// Default: false
+    /// 默认值: false
     pub as_legacy_transaction: bool,
-    /// This enables the usage of shared program accounts. That means no intermediate token accounts or open orders accounts need to be created.
-    /// But it also means that the likelihood of hot accounts is higher.
+    /// 启用共享程序账户的使用。这意味着不需要创建中间代币账户或开放订单账户。
+    /// 但同时热门账户的可能性也会更高。
     ///
-    /// Default: Optimized internally
+    /// 默认值: 内部优化决定
     pub use_shared_accounts: Option<bool>,
-    /// This is useful when the instruction before the swap has a transfer that increases the input token amount.
-    /// Then, the swap will just use the difference between the token ledger token amount and post token amount.
+    /// 当交换前的指令包含转账操作从而增加输入代币数量时，此选项非常有用。
+    /// 交换将仅使用代币账本记录的数量与当前代币数量之间的差额。
     ///
-    /// Default: false
+    /// 默认值: false
     pub use_token_ledger: bool,
-    /// Skip RPC calls and assume the user account do not exist,
-    /// as a result all setup instruction will be populated but no RPC call will be done for user related accounts (token accounts, openbook open orders...)
+    /// 跳过RPC调用，并假设用户账户不存在。
+    /// 因此，所有设置指令都会被填充，但不会为用户相关账户（代币账户、Openbook开放订单等）进行RPC调用。
     pub skip_user_accounts_rpc_calls: bool,
-    /// Providing keyed ui accounts allow loading AMMs that are not in the market cache
-    /// If a keyed ui account is the AMM state, it has to be provided with its params according to the market cache format
+    /// 提供带键的UI账户允许加载不在市场缓存中的AMM。
+    /// 如果一个带键的UI账户是AMM状态，必须按照市场缓存格式提供其参数。
     pub keyed_ui_accounts: Option<Vec<KeyedUiAccount>>,
-    /// The program authority ID
+    /// 程序授权ID
     pub program_authority_id: Option<u8>,
-    /// Dynamic slippage
+    /// 动态滑点设置
     pub dynamic_slippage: Option<DynamicSlippageSettings>,
-    /// Slots to expiry of the blockhash
+    /// 区块哈希过期前的剩余插槽数
     pub blockhash_slots_to_expiry: Option<u8>,
-    /// Requests a correct last valid block height,
-    /// this is to allow a smooth transition to agave 2.0 for all consumers, see https://github.com/solana-labs/solana/issues/24526
+    /// 请求正确的最后一个有效区块高度，
+    /// 这是为了让所有消费者能平滑过渡到agave 2.0，参见 https://github.com/solana-labs/solana/issues/24526
     pub correct_last_valid_block_height: bool,
 }
+
 
 impl Default for TransactionConfig {
     fn default() -> Self {

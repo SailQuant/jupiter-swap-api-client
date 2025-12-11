@@ -64,52 +64,52 @@ pub struct QuoteRequest {
     pub input_mint: Pubkey,
     #[serde(with = "field_as_string")]
     pub output_mint: Pubkey,
-    /// The amount to swap, have to factor in the token decimals.
+    /// 要交换的金额，需要考虑代币的小数位数。
     #[serde(with = "field_as_string")]
     pub amount: u64,
-    /// (ExactIn or ExactOut) Defaults to ExactIn.
-    /// ExactOut is for supporting use cases where you need an exact token amount, like payments.
-    /// In this case the slippage is on the input token.
+    /// (ExactIn 或 ExactOut) 默认为 ExactIn。
+    /// ExactOut 用于支持需要精确代币数量的场景，例如支付。
+    /// 在这种情况下，滑点适用于输入代币。
     pub swap_mode: Option<SwapMode>,
-    /// Allowed slippage in basis points
+    /// 允许的滑点，以基点(basis points)为单位
     pub slippage_bps: u16,
-    /// Default is false.
-    /// By setting this to true, our API will suggest smart slippage info that you can use.
-    /// slippageBps is what we suggest you to use. Additionally, you should check out max_auto_slippage_bps and auto_slippage_collision_usd_value.
+    /// 默认为 false。
+    /// 将其设置为 true 时，我们的API将提供可使用的智能滑点建议。
+    /// slippageBps 是我们建议您使用的值。此外，您还应查看 max_auto_slippage_bps 和 auto_slippage_collision_usd_value。
     pub auto_slippage: Option<bool>,
-    /// The max amount of slippage in basis points that you are willing to accept for auto slippage.
+    /// 您愿意为自动滑点接受的最大滑点量（以基点为单位）。
     pub max_auto_slippage_bps: Option<u16>,
     pub compute_auto_slippage: bool,
-    /// The max amount of USD value that you are willing to accept for auto slippage.
+    /// 您愿意为自动滑点接受的最大美元价值。
     pub auto_slippage_collision_usd_value: Option<u32>,
-    /// Quote with a greater amount to find the route to minimize slippage
+    /// 使用更大的金额进行报价，以找到最小化滑点的路由
     pub minimize_slippage: Option<bool>,
-    /// Platform fee in basis points
+    /// 平台费用，以基点为单位
     pub platform_fee_bps: Option<u8>,
     pub dexes: Option<Dexes>,
     pub excluded_dexes: Option<Dexes>,
-    /// Quote only direct routes
+    /// 仅报价直接路由
     pub only_direct_routes: Option<bool>,
-    /// Quote fit into legacy transaction
+    /// 报价是否适配传统交易
     pub as_legacy_transaction: Option<bool>,
-    /// Restrict intermediate tokens to a top token set that has stable liquidity.
-    /// This will help to ease potential high slippage error rate when swapping with minimal impact on pricing.
+    /// 将中间代币限制在具有稳定流动性的顶级代币集合内。
+    /// 这有助于降低潜在的高滑点错误率，同时对价格影响最小。
     pub restrict_intermediate_tokens: Option<bool>,
-    /// Find a route given a maximum number of accounts involved,
-    /// this might dangerously limit routing ending up giving a bad price.
-    /// The max is an estimation and not the exact count
+    /// 根据最大涉及的账户数量查找路由，
+    /// 这可能会危险地限制路由，最终导致不良价格。
+    /// 最大值是估计值，并非精确计数
     pub max_accounts: Option<usize>,
-    /// Quote type to be used for routing, switches the algorithm
+    /// 用于路由的报价类型，切换算法
     pub quote_type: Option<String>,
-    /// Extra args which are quote type specific to allow controlling settings from the top level
+    /// 特定于报价类型的额外参数，允许从顶层控制设置
     pub quote_args: Option<HashMap<String, String>>,
-    /// enable only full liquid markets as intermediate tokens
+    /// 仅启用完全流动的市场作为中间代币
     pub prefer_liquid_dexes: Option<bool>,
-    /// Use the compute unit score to pick a route
+    /// 使用计算单元评分来选择路由
     pub compute_unit_score: Option<ComputeUnitScore>,
-    /// Routing constraints
+    /// 路由约束条件
     pub routing_constraints: Option<String>,
-    /// Token category based intermediates token
+    /// 基于代币类别的中间代币
     pub token_category_based_intermediate_tokens: Option<bool>,
 }
 
