@@ -5,6 +5,7 @@ use std::{collections::HashMap, str::FromStr};
 
 use crate::route_plan_with_metadata::RoutePlanWithMetadata;
 use crate::serde_helpers::field_as_string;
+use crate::serde_helpers::option_field_as_string;
 use anyhow::{anyhow, Error};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
@@ -27,10 +28,18 @@ pub struct SwapInfo {
     /// An estimation of the output amount into the AMM
     #[serde(with = "field_as_string")]
     pub out_amount: u64,
-    #[serde(with = "field_as_string")]
-    pub fee_amount: u64,
-    #[serde(with = "field_as_string")]
-    pub fee_mint: Pubkey,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "option_field_as_string"
+    )]
+    pub fee_amount: Option<u64>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "option_field_as_string"
+    )]
+    pub fee_mint: Option<Pubkey>,
 }
 
 #[derive(Serialize, Deserialize, Default, PartialEq, Clone, Debug)]
@@ -228,3 +237,4 @@ pub struct QuoteResponse {
     #[serde(default)]
     pub time_taken: f64,
 }
+
